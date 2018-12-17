@@ -1,28 +1,64 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import firebase from 'firebase'
+import firebaseApp from './firebase'
+import { Routes } from './routes'
 
 class App extends Component {
+
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      user: null
+    }
+  }
+
+  componentDidMount() {
+    firebase
+      .auth()
+      .onAuthStateChanged(user => {
+        this.setState({ user })
+      })
+  }
+
+  logIn() {
+    const provider = new firebase.auth.GoogleAuthProvider()
+    firebaseApp
+      .auth()
+      .signInWithRedirect(provider)
+  }
+
+  logOut = () => {
+    firebase
+      .auth()
+      .signOut()
+
+    this.setState({
+      user: null
+    })
+  }
+
   render() {
+    const { user } = this.state
+    if (!user) {
+      return (
+        <div>
+          <button onClick={this.logIn}>
+            Googleアカウントでログイン
+          </button>
+        </div>
+      )
+    }
+
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        <button onClick={this.logOut} style={{ postion: 'absolute', top: 0 }}>ログアウトする</button>
+        <Routes
+          user={user}
+        />
       </div>
     );
   }
 }
 
-export default App;
+export default App
